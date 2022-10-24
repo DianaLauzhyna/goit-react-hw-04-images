@@ -46,6 +46,7 @@ export default function App() {
   const receivedImages = useCallback(async () => {
     setLoading(true);
     try {
+      console.log(fetchQuery);
       const fetchedData = await pixabayApiService(
         fetchQuery,
         page,
