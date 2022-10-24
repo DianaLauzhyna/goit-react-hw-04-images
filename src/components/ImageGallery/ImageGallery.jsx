@@ -5,17 +5,18 @@ import { Gallery } from './ImageGallery.styled';
 
 export const ImageGallery = ({ fetchedImages, onClick }) => (
   <Gallery>
-    {fetchedImages.map(({ id, largeImageURL, webformatURL }) => {
-      return (
-        <ImageGalleryItem
-          key={id}
-          thumbImageUrl={webformatURL}
-          onClick={() => {
-            onClick(largeImageURL);
-          }}
-        ></ImageGalleryItem>
-      );
-    })}
+    {fetchedImages &&
+      fetchedImages.map(({ id, largeImageURL, webformatURL, previewURL }) => {
+        return (
+          <ImageGalleryItem
+            key={id}
+            thumbImageUrl={webformatURL}
+            onClick={() => {
+              onClick(largeImageURL, previewURL);
+            }}
+          ></ImageGalleryItem>
+        );
+      })}
   </Gallery>
 );
 
