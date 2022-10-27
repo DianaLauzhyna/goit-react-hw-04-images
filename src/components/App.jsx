@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import Searchbar from './Searchbar';
-import ImageGallery from './ImageGallery';
-import Button from './Button';
-import Loader from './Loader';
-import Modal from './Modal';
+import Searchbar from './Searchbar/Searchbar';
+import ImageGallery from './ImageGallery/ImageGallery';
+import Button from './Button/Button';
+import Loader from './Loader/Loader';
+import Modal from './Modal/Modal';
 import { api } from 'helpers/helpers';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -71,7 +71,6 @@ export const App = () => {
 
   const loadMoreHandler = () => {
     setPage(prevState => prevState + 1);
-    // this.setState(prevState => ({ page: prevState.page + 1 }));
   };
 
   const modalHandler = data => {

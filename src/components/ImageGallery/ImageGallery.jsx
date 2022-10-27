@@ -1,6 +1,6 @@
-import PropTypes from 'prop-types'; // ES6
+import PropTypes from 'prop-types'; 
 
-import ImageGalleryItem from 'components/ImageGalleryItem';
+import ImageGalleryItem from 'components/ImageGalleryItem/ImageGalleryItem';
 
 import Ul from './ImageGallery.styled';
 const ImageGallery = ({ imgItems, modalHandler }) => {

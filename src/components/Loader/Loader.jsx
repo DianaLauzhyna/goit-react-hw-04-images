@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types'; // ES6
+import PropTypes from 'prop-types';
 import { Dna } from 'react-loader-spinner';
 import Div from './Loader.styled';
 const Loader = ({ isLoading }) => (

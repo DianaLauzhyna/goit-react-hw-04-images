@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types'; // ES6
+import PropTypes from 'prop-types'; 
 import { Header, Form, Button, Input } from './Searchbar.styled';
 import { FcSearch } from 'react-icons/fc';
 import { useState } from 'react';
