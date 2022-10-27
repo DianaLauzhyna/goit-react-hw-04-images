@@ -1,158 +1,118 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import Searchbar from './Searchbar';
+import ImageGallery from './ImageGallery';
+import Button from './Button';
+import Loader from './Loader';
+import Modal from './Modal';
+import { api } from 'helpers/helpers';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-import { LazyLoadImage } from 'react-lazy-load-image-component';
-import 'react-lazy-load-image-component/src/effects/blur.css';
+export const App = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadMore, setLoadMore] = useState(true);
+  const [isModal, setIsModal] = useState(false);
 
-import { Searchbar, SearchForm, ImageGallery, Button, Modal } from './';
-import { pixabayApiService } from '../utils';
-import {
-  notifySuccess,
-  notifyWarning,
-  notifyInfo,
-  notifyError,
-  Loader,
-} from '../vendors';
-import {
-  Wrapper,
-  PreSearchPlaceHolder,
-  StyledToastContainer,
-} from './App.styled';
-
-export default function App() {
-  const [fetchedImages, setFetchedImages] = useState(null);
-  const [fetchQuery, setFetchQuery] = useState('');
+  const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
-  const [showModal, setShowModal] = useState(false);
-  const [modalImg, setModalImg] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [showLoadMoreBtn, setShowLoadMoreBtn] = useState(false);
 
-  const isFirstRender = useRef(true);
+  const [imgItems, setImgItems] = useState([]);
+  const [modalData, setModalData] = useState([]);
 
-  const IMG_PER_PAGE = 12;
-
-  const toggleLoadMoreBtn = useCallback(
-    (IMG_PER_PAGE, totalFoundImagesQuantity) => {
-      if (page >= totalFoundImagesQuantity / IMG_PER_PAGE) {
-        notifyInfo('No more images to load by your request');
-        return setShowLoadMoreBtn(false);
-      } else {
-        return setShowLoadMoreBtn(true);
-      }
-    },
-    [page],
-  );
-
-  const receivedImages = useCallback(async () => {
-    setLoading(true);
+  const loadImg = async () => {
     try {
-      const fetchedData = await pixabayApiService(
-        fetchQuery,
-        page,
-        IMG_PER_PAGE,
-      );
-      const { hits: newlyFetchedImages, totalHits: totalFoundImagesQuantity } =
-        fetchedData;
+      const response = await api(query, page);
+      const { totalHits, hits } = response;
 
-      if (totalFoundImagesQuantity === 0) {
-        return notifyWarning('Nothing found by your request');
-      } else {
-        if (page === 1) {
-          notifySuccess(
-            `${totalFoundImagesQuantity} images found by your request!`,
-          );
+      if (response) {
+        if (totalHits === 0) {
+          setImgItems([]);
+          setLoadMore(false);
+          return toast.error('nothing found');
         }
-        toggleLoadMoreBtn(IMG_PER_PAGE, totalFoundImagesQuantity);
-        return setFetchedImages(prevFetchedImages => {
-          if (prevFetchedImages) {
-            return [...prevFetchedImages, ...newlyFetchedImages];
-          } else {
-            return [...newlyFetchedImages];
-          }
+
+        if (Math.ceil(totalHits / 16) === page) {
+          setLoadMore(false);
+        }
+
+        if (page === 1) {
+          setImgItems(hits);
+          toast.success(`Total found ${totalHits} images`);
+        } else {
+          setImgItems(prevState => [...prevState, ...hits]);
+        }
+
+        window.scrollBy({
+          top: window.innerHeight - 76,
+          behavior: 'smooth',
         });
       }
     } catch (error) {
-      console.log(error);
-      notifyError(
-        `An error occured processing your request. Retry, or contact site Admin for "${error.message}" if repeats.`,
-      );
+      toast.error(`${error}`);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  }, [fetchQuery, page, toggleLoadMoreBtn]);
+  };
 
-  function recordFetchQuery(searchQuery) {
-    if (searchQuery === fetchQuery) {
-      return;
-    } else {
-      setFetchQuery(searchQuery);
-      setInitialState();
+  useEffect(() => {
+    loadImg();
+    // eslint-disable-next-line
+  }, [page, query]);
+
+  const onSubmitHandler = value => {
+    if (!value) {
+      return toast.info(`Please le me know that are you looking`);
     }
-  }
-
-  function setInitialState() {
-    setFetchedImages(null);
+    setQuery(value);
     setPage(1);
-  }
+    setIsLoading(true);
+    setLoadMore(true);
+  };
 
-  function loadMoreImages() {
-    setPage(page + 1);
-  }
+  const loadMoreHandler = () => {
+    setPage(prevState => prevState + 1);
+    // this.setState(prevState => ({ page: prevState.page + 1 }));
+  };
 
-  function toggleModal() {
-    setShowModal(showModal => !showModal);
-  }
-
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    } else {
-      receivedImages();
-    }
-  }, [receivedImages]);
-
-  useEffect(() => {
-    if (page > 1) {
-      return window.scrollBy({ top: 1000, behavior: 'smooth' });
-    }
-  }, [page, fetchedImages]);
+  const modalHandler = data => {
+    setModalData(data);
+    setIsModal(prevState => !prevState);
+  };
 
   return (
-    <>
-      <Wrapper>
-        <Searchbar>
-          <SearchForm onSubmit={recordFetchQuery} />
-        </Searchbar>
-        {!fetchedImages && !loading ? (
-          <PreSearchPlaceHolder>
-            Search for the images you like by the key word.
-          </PreSearchPlaceHolder>
-        ) : (
-          <ImageGallery
-            fetchedImages={fetchedImages}
-            onClick={(largeImageURL, previewURL) => {
-              toggleModal();
-              setModalImg({ largeImageURL, previewURL });
-            }}
-          />
-        )}
-        {loading && <Loader />}
-        {showModal && (
-          <Modal closeModal={toggleModal}>
-            <LazyLoadImage
-              src={modalImg.largeImageURL}
-              alt="Enlarged"
-              effect="blur"
-              placeholderSrc={modalImg.previewURL}
-            />
-          </Modal>
-        )}
-      </Wrapper>
-      {showLoadMoreBtn && !loading && (
-        <Button onClick={loadMoreImages}>Load more</Button>
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr',
+        gridGap: '16px',
+        paddingBottom: '24px',
+      }}
+    >
+      <Searchbar onSubmitHandler={onSubmitHandler} />
+      {isLoading ? (
+        <Loader isLoading={true} />
+      ) : (
+        <ImageGallery imgItems={imgItems} modalHandler={modalHandler} />
       )}
-      <StyledToastContainer />
-    </>
+      {isLoadMore && <Button loadMoreHandler={loadMoreHandler} />}
+      {isModal && (
+        <Modal
+          alt={modalData.alt}
+          src={modalData.largeImageURL}
+          modalHandler={modalHandler}
+        />
+      )}
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+    </div>
   );
-}
+};

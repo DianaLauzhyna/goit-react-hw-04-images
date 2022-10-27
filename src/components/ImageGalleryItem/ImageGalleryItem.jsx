@@ -1,14 +1,28 @@
-import PropTypes from 'prop-types';
+import PropTypes from 'prop-types'; // ES6
 
-import { GalleryItem, GalleryItemImg } from './ImageGalleryItem.styled';
+import { Li, Img } from './ImageGalleryItem.styled';
 
-export const ImageGalleryItem = ({ id, onClick, thumbImageUrl }) => (
-  <GalleryItem key={id} onClick={onClick}>
-    <GalleryItemImg src={thumbImageUrl} alt="Found image" />
-  </GalleryItem>
+const ImageGalleryItem = ({
+  webformatURL,
+  largeImageURL,
+  alt,
+  modalHandler,
+}) => (
+  <Li className="gallery-item">
+    <Img
+      src={webformatURL}
+      alt={alt}
+      onClick={() => {
+        modalHandler({ largeImageURL, alt });
+      }}
+    />
+  </Li>
 );
 
 ImageGalleryItem.propTypes = {
-  onClick: PropTypes.func.isRequired,
-  thumbImageUrl: PropTypes.string.isRequired,
+  webformatURL: PropTypes.string,
+  largeImageURL: PropTypes.string,
+  alt: PropTypes.string,
+  modalHandler: PropTypes.func,
 };
+export default ImageGalleryItem;

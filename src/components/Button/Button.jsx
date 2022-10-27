@@ -1,16 +1,14 @@
-import PropTypes from 'prop-types';
+import PropTypes from 'prop-types'; // ES6
 
-import { Btn } from './Button.styled';
+import { ButtonLoad } from './Button.styled';
 
-export const Button = ({ onClick, children }) => {
-  return (
-    <Btn type="button" onClick={onClick}>
-      {children}
-    </Btn>
-  );
-};
+const Button = ({ loadMoreHandler }) => (
+  <ButtonLoad type="button" onClick={loadMoreHandler}>
+    Load more
+  </ButtonLoad>
+);
 
 Button.propTypes = {
-  onClick: PropTypes.func.isRequired,
-  children: PropTypes.node.isRequired,
+  loadMoreHandler: PropTypes.func.isRequired,
 };
+export default Button;

@@ -1,46 +1,33 @@
-import { useEffect, useCallback } from 'react';
-import PropTypes from 'prop-types';
+import PropTypes from 'prop-types'; // ES6
+import { useEffect } from 'react';
+import { DivModal, DivOverlay } from './Modal.styled';
 
-import { Overlay, ModalWindow } from './Modal.styled';
-
-export function Modal({ closeModal, children }) {
-  const keydownHandler = useCallback(
-    ({ code }) => {
-      if (code === 'Escape') {
-        closeModal();
-      }
-    },
-    [closeModal],
-  );
+const Modal = ({ alt, src, modalHandler }) => {
+  const closeModalKeyHandler = e => {
+    if (e.code === 'Escape' || e.target === e.currentTarget) {
+      console.log(e.target, e.currentTarget);
+      modalHandler({});
+    }
+  };
 
   useEffect(() => {
-    window.addEventListener('keydown', keydownHandler);
-    switchBodyScroll('hidden', '17px');
-    return () => {
-      window.removeEventListener('keydown', keydownHandler);
-      switchBodyScroll('unset', '0');
-    };
-  }, [keydownHandler]);
-
-  function switchBodyScroll(state, margin) {
-    document.body.style.overflow = state;
-    document.body.style.marginRight = margin;
-  }
+    window.addEventListener('keydown', closeModalKeyHandler);
+    return () => window.removeEventListener('keydown', closeModalKeyHandler);
+    // eslint-disable-next-line
+  }, []);
 
   return (
-    <Overlay
-      onClick={({ target, currentTarget }) => {
-        if (target === currentTarget) {
-          closeModal();
-        }
-      }}
-    >
-      <ModalWindow>{children}</ModalWindow>
-    </Overlay>
+    <DivOverlay onClick={closeModalKeyHandler}>
+      <DivModal>
+        <img src={src} alt={alt} />
+      </DivModal>
+    </DivOverlay>
   );
-}
+};
 
 Modal.propTypes = {
-  closeModal: PropTypes.func.isRequired,
-  children: PropTypes.node.isRequired,
+  alt: PropTypes.string.isRequired,
+  src: PropTypes.string.isRequired,
+  modalHandler: PropTypes.func.isRequired,
 };
+export default Modal;
